@@ -75,7 +75,7 @@ const AnimatedCard = ({ children }) => {
   return <motion.div variants={itemVariants}>{children}</motion.div>;
 };
 
-export default function DashboardPage({ sidebarOpen }) {
+export default function DashboardPage({ sidebarOpen, darkMode }) {
   return (
     <div className={sidebarOpen ? "ml-64" : ""}>
       {/* Header */}
@@ -84,39 +84,44 @@ export default function DashboardPage({ sidebarOpen }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <DashboardHeader sidebarOpen={sidebarOpen} />
+        <DashboardHeader sidebarOpen={sidebarOpen} darkMode={darkMode} />
       </motion.div>
 
       {/* Cards (Storage + Growth) */}
       <AnimatedSection className="m-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           <AnimatedCard>
-            <StorageCard name="Radit" usage={75} total={100} />
+            <StorageCard
+              name="Radit"
+              usage={75}
+              total={100}
+              darkMode={darkMode}
+            />
           </AnimatedCard>
           <AnimatedCard>
-            <GrowthCard />
+            <GrowthCard darkMode={darkMode} />
           </AnimatedCard>
         </div>
       </AnimatedSection>
 
       {/* Row 2: Stats Cards */}
       <AnimatedSection className="m-5">
-        <StatsCardGroup />
+        <StatsCardGroup darkMode={darkMode} />
       </AnimatedSection>
 
       {/* Row 3: Analytics Row (Sales Activity, Warehouse, Timeline, Visitors) */}
       <AnimatedSection className="m-5">
-        <AnalyticsRow />
+        <AnalyticsRow darkMode={darkMode} />
       </AnimatedSection>
 
       {/* Row 4: Browser Usage + Customers + Tasks */}
       <AnimatedSection className="m-5">
-        <DashboardWidgets />
+        <DashboardWidgets darkMode={darkMode} />
       </AnimatedSection>
 
       {/* New Row: Product Summary Table */}
       <AnimatedSection className="m-5">
-        <ProductSummaryTable />
+        <ProductSummaryTable darkMode={darkMode} />
       </AnimatedSection>
     </div>
   );
