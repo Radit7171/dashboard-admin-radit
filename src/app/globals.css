@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Scrollbar global untuk seluruh halaman */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+  border: 2px solid #0f172a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Untuk Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0f172a;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
