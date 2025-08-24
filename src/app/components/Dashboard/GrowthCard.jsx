@@ -11,10 +11,7 @@ import {
   Legend,
   Area,
 } from "recharts";
-import { 
-  useState,
-  useEffect 
-} from "react";
+import { useState, useEffect } from "react";
 import {
   TrendingUp,
   BarChart3,
@@ -30,16 +27,18 @@ import {
   Zap,
   Award,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
 } from "lucide-react";
+import { useDarkModeCtx } from "@/app/DarkModeContext"; // sesuaikan path
 
 export default function GrowthCard() {
-  const [activeMetric, setActiveMetric] = useState("both"); // 'orders', 'sales', or 'both'
-  const [timeFrame, setTimeFrame] = useState("yearly"); // 'monthly', 'quarterly', 'yearly'
+  const { darkMode } = useDarkModeCtx(); // ← ambil dari context
+  const [activeMetric, setActiveMetric] = useState("both");
+  const [timeFrame, setTimeFrame] = useState("yearly");
   const [showForecast, setShowForecast] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  
+
   const data = [
     { month: "Jan", orders: 40, sales: 65, forecast: 70 },
     { month: "Feb", orders: 50, sales: 80, forecast: 85 },
@@ -60,20 +59,55 @@ export default function GrowthCard() {
     ((data[data.length - 1].sales - data[0].sales) / data[0].sales) * 100
   );
 
+  // Warna yang akan berubah berdasarkan mode
+  const gradientFrom = darkMode ? "from-[#1e293b]" : "from-[#f1f5f9]";
+  const gradientTo = darkMode ? "to-[#0f172a]" : "to-[#e2e8f0]";
+  const borderColor = darkMode ? "border-gray-700" : "border-gray-300";
+  const hoverBorder = darkMode
+    ? "hover:border-blue-500/30"
+    : "hover:border-blue-400/50";
+  const textPrimary = darkMode ? "text-gray-100" : "text-gray-800";
+  const textSecondary = darkMode ? "text-gray-400" : "text-gray-600";
+  const buttonBg = darkMode ? "bg-gray-800" : "bg-gray-100";
+  const buttonHover = darkMode ? "hover:bg-gray-700" : "hover:bg-gray-200";
+  const statsBg = darkMode ? "bg-gray-800/50" : "bg-gray-100/80";
+  const statsBorder = darkMode ? "border-gray-700" : "border-gray-300";
+  const timeFrameActive = darkMode
+    ? "bg-blue-600 text-white"
+    : "bg-blue-500 text-white";
+  const metricActive = darkMode
+    ? "bg-blue-600 text-white"
+    : "bg-blue-500 text-white";
+  const dividerColor = darkMode ? "border-gray-800" : "border-gray-200";
+
   // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-xl">
-          <p className="text-gray-300 font-medium mb-2">{label}</p>
+        <div
+          className={`${
+            darkMode
+              ? "bg-gray-800 border-gray-700"
+              : "bg-white border-gray-200"
+          } p-4 rounded-lg border shadow-xl`}
+        >
+          <p
+            className={`${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            } font-medium mb-2`}
+          >
+            {label}
+          </p>
           <div className="space-y-1">
             {payload.map((entry, index) => (
               <div key={index} className="flex items-center gap-2 text-sm">
-                <div 
-                  className="w-3 h-3 rounded-full" 
+                <div
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: entry.color }}
                 ></div>
-                <span className="text-gray-300">{entry.name}:</span>
+                <span className={darkMode ? "text-gray-300" : "text-gray-700"}>
+                  {entry.name}:
+                </span>
                 <span className="font-medium" style={{ color: entry.color }}>
                   {entry.value}%
                 </span>
@@ -113,14 +147,16 @@ export default function GrowthCard() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-2xl shadow-xl p-6 border border-gray-700 w-full transition-all duration-300 hover:shadow-2xl hover:border-blue-500/30 relative overflow-hidden">
+    <div
+      className={`bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-2xl shadow-xl p-6 border ${borderColor} w-full transition-all duration-300 hover:shadow-2xl ${hoverBorder} relative overflow-hidden`}
+    >
       {/* Loading overlay */}
       {isLoading && (
         <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-20">
           <RefreshCw className="animate-spin text-blue-400" size={24} />
         </div>
       )}
-      
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
         <div className="flex items-center gap-3">
@@ -128,66 +164,90 @@ export default function GrowthCard() {
             <TrendingUp className="text-blue-400" size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2
+              className={`text-xl font-bold ${textPrimary} flex items-center gap-2`}
+            >
               Growth Overview
               <span className="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded-full flex items-center gap-1">
-                <Zap size={12} />
-                +{growthPercentage}% YoY
+                <Zap size={12} />+{growthPercentage}% YoY
               </span>
             </h2>
-            <p className="text-gray-400 text-sm mt-1">January - December 2023</p>
+            <p className={`${textSecondary} text-sm mt-1`}>
+              January - December 2023
+            </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 mt-4 lg:mt-0">
-          <div className="flex bg-gray-800 p-1 rounded-lg">
-            <button 
-              onClick={() => setTimeFrame('monthly')}
-              className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${timeFrame === 'monthly' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+          <div className={`flex ${buttonBg} p-1 rounded-lg`}>
+            <button
+              onClick={() => setTimeFrame("monthly")}
+              className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${
+                timeFrame === "monthly"
+                  ? timeFrameActive
+                  : textSecondary +
+                    " hover:" +
+                    (darkMode ? "text-white" : "text-gray-800")
+              }`}
             >
               <Calendar size={12} />
               Monthly
             </button>
-            <button 
-              onClick={() => setTimeFrame('quarterly')}
-              className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${timeFrame === 'quarterly' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+            <button
+              onClick={() => setTimeFrame("quarterly")}
+              className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${
+                timeFrame === "quarterly"
+                  ? timeFrameActive
+                  : textSecondary +
+                    " hover:" +
+                    (darkMode ? "text-white" : "text-gray-800")
+              }`}
             >
               <BarChart3 size={12} />
               Quarterly
             </button>
-            <button 
-              onClick={() => setTimeFrame('yearly')}
-              className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${timeFrame === 'yearly' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+            <button
+              onClick={() => setTimeFrame("yearly")}
+              className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${
+                timeFrame === "yearly"
+                  ? timeFrameActive
+                  : textSecondary +
+                    " hover:" +
+                    (darkMode ? "text-white" : "text-gray-800")
+              }`}
             >
               <Target size={12} />
               Yearly
             </button>
           </div>
-          
+
           <div className="flex gap-1">
-            <button 
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-blue-400 transition-colors"
+            <button
+              className={`p-2 rounded-lg ${buttonBg} ${textSecondary} ${buttonHover} hover:text-blue-400 transition-colors`}
               onClick={handleDownload}
               title="Download Report"
             >
               <Download size={16} />
             </button>
-            <button 
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-green-400 transition-colors"
+            <button
+              className={`p-2 rounded-lg ${buttonBg} ${textSecondary} ${buttonHover} hover:text-green-400 transition-colors`}
               onClick={handleFilter}
               title="Filter Data"
             >
               <Filter size={16} />
             </button>
-            <button 
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-yellow-400 transition-colors"
+            <button
+              className={`p-2 rounded-lg ${buttonBg} ${textSecondary} ${buttonHover} hover:text-yellow-400 transition-colors`}
               onClick={handleRefresh}
               title="Refresh Data"
             >
-              <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+              <RefreshCw
+                size={16}
+                className={isLoading ? "animate-spin" : ""}
+              />
             </button>
-            <button 
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-purple-400 transition-colors"
+            <button
+              className={`p-2 rounded-lg ${buttonBg} ${textSecondary} ${buttonHover} hover:text-purple-400 transition-colors`}
               onClick={toggleExpand}
               title={expanded ? "Collapse" : "Expand"}
             >
@@ -199,10 +259,12 @@ export default function GrowthCard() {
 
       {/* Stats summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-blue-500/30 transition-colors">
+        <div
+          className={`${statsBg} p-4 rounded-lg border ${statsBorder} hover:border-blue-500/30 transition-colors`}
+        >
           <div className="flex items-center gap-2 mb-2">
             <ShoppingCart size={16} className="text-blue-400" />
-            <p className="text-gray-400 text-sm">Total Orders</p>
+            <p className={`${textSecondary} text-sm`}>Total Orders</p>
           </div>
           <p className="text-2xl font-bold text-blue-400">
             {data.reduce((acc, curr) => acc + curr.orders, 0).toLocaleString()}
@@ -214,27 +276,30 @@ export default function GrowthCard() {
             </span>
           </div>
         </div>
-        
-        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-green-500/30 transition-colors">
+
+        <div
+          className={`${statsBg} p-4 rounded-lg border ${statsBorder} hover:border-green-500/30 transition-colors`}
+        >
           <div className="flex items-center gap-2 mb-2">
             <DollarSign size={16} className="text-green-400" />
-            <p className="text-gray-400 text-sm">Total Sales</p>
+            <p className={`${textSecondary} text-sm`}>Total Sales</p>
           </div>
           <p className="text-2xl font-bold text-green-400">
             {data.reduce((acc, curr) => acc + curr.sales, 0).toLocaleString()}%
           </p>
           <div className="flex items-center mt-1">
             <span className="text-xs text-green-300 flex items-center gap-1">
-              <TrendingUp size={12} />
-              +{growthPercentage}% from previous year
+              <TrendingUp size={12} />+{growthPercentage}% from previous year
             </span>
           </div>
         </div>
-        
-        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-purple-500/30 transition-colors">
+
+        <div
+          className={`${statsBg} p-4 rounded-lg border ${statsBorder} hover:border-purple-500/30 transition-colors`}
+        >
           <div className="flex items-center gap-2 mb-2">
             <Award size={16} className="text-purple-400" />
-            <p className="text-gray-400 text-sm">Peak Performance</p>
+            <p className={`${textSecondary} text-sm`}>Peak Performance</p>
           </div>
           <p className="text-2xl font-bold text-purple-400">December</p>
           <div className="flex items-center mt-1">
@@ -247,70 +312,107 @@ export default function GrowthCard() {
 
       {/* Metric selector */}
       <div className="flex justify-between items-center mb-4">
-        <div className="flex space-x-2 bg-gray-800 p-1 rounded-lg">
-          <button 
-            onClick={() => setActiveMetric('orders')}
-            className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${activeMetric === 'orders' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+        <div className={`flex ${buttonBg} p-1 rounded-lg`}>
+          <button
+            onClick={() => setActiveMetric("orders")}
+            className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${
+              activeMetric === "orders"
+                ? metricActive
+                : textSecondary +
+                  " hover:" +
+                  (darkMode ? "text-white" : "text-gray-800")
+            }`}
           >
             <ShoppingCart size={12} />
             Orders
           </button>
-          <button 
-            onClick={() => setActiveMetric('sales')}
-            className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${activeMetric === 'sales' ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'}`}
+          <button
+            onClick={() => setActiveMetric("sales")}
+            className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${
+              activeMetric === "sales"
+                ? "bg-green-600 text-white"
+                : textSecondary +
+                  " hover:" +
+                  (darkMode ? "text-white" : "text-gray-800")
+            }`}
           >
             <DollarSign size={12} />
             Sales
           </button>
-          <button 
-            onClick={() => setActiveMetric('both')}
-            className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${activeMetric === 'both' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
+          <button
+            onClick={() => setActiveMetric("both")}
+            className={`px-3 py-1 text-xs rounded-md transition-all flex items-center gap-1 ${
+              activeMetric === "both"
+                ? "bg-purple-600 text-white"
+                : textSecondary +
+                  " hover:" +
+                  (darkMode ? "text-white" : "text-gray-800")
+            }`}
           >
             <BarChart3 size={12} />
             Both
           </button>
         </div>
-        
-        <button 
+
+        <button
           onClick={toggleForecast}
-          className={`text-xs flex items-center gap-1 px-2 py-1 rounded-md ${showForecast ? 'bg-cyan-900/30 text-cyan-400' : 'bg-gray-800 text-gray-400 hover:text-cyan-400'}`}
+          className={`text-xs flex items-center gap-1 px-2 py-1 rounded-md ${
+            showForecast
+              ? "bg-cyan-900/30 text-cyan-400"
+              : buttonBg + " " + textSecondary + " hover:text-cyan-400"
+          }`}
         >
           {showForecast ? <EyeOff size={12} /> : <Eye size={12} />}
-          {showForecast ? 'Hide Forecast' : 'Show Forecast'}
+          {showForecast ? "Hide Forecast" : "Show Forecast"}
         </button>
       </div>
 
       {/* Chart */}
-      <div className={`w-full transition-all duration-500 ${expanded ? 'h-96' : 'h-72'}`}>
+      <div
+        className={`w-full transition-all duration-500 ${
+          expanded ? "h-96" : "h-72"
+        }`}
+      >
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            
-            <XAxis 
-              dataKey="month" 
-              stroke="#94a3b8" 
-              tick={{ fontSize: 12 }} 
+          <LineChart
+            data={data}
+            margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={darkMode ? "#334155" : "#e2e8f0"}
+              opacity={0.3}
+            />
+
+            <XAxis
+              dataKey="month"
+              stroke={darkMode ? "#94a3b8" : "#64748b"}
+              tick={{ fontSize: 12 }}
               axisLine={false}
             />
-            
-            <YAxis 
-              domain={[0, showForecast ? 120 : 100]} 
-              ticks={[0, 20, 40, 60, 80, 100, 120]} 
-              stroke="#94a3b8" 
-              tick={{ fontSize: 12 }} 
+
+            <YAxis
+              domain={[0, showForecast ? 120 : 100]}
+              ticks={[0, 20, 40, 60, 80, 100, 120]}
+              stroke={darkMode ? "#94a3b8" : "#64748b"}
+              tick={{ fontSize: 12 }}
               axisLine={false}
             />
-            
+
             <Tooltip content={<CustomTooltip />} />
-            
-            <Legend 
-              verticalAlign="top" 
+
+            <Legend
+              verticalAlign="top"
               height={36}
               iconType="circle"
               iconSize={10}
-              wrapperStyle={{ color: "#e2e8f0", fontSize: "12px", paddingBottom: "15px" }}
+              wrapperStyle={{
+                color: darkMode ? "#e2e8f0" : "#334155",
+                fontSize: "12px",
+                paddingBottom: "15px",
+              }}
             />
-            
+
             <defs>
               <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
@@ -327,65 +429,65 @@ export default function GrowthCard() {
             </defs>
 
             {/* Conditionally render based on active metric */}
-            {(activeMetric === 'orders' || activeMetric === 'both') && (
+            {(activeMetric === "orders" || activeMetric === "both") && (
               <>
-                <Area 
-                  type="monotone" 
-                  dataKey="orders" 
-                  stroke="#3b82f6" 
-                  fill="url(#colorOrders)" 
-                  strokeWidth={3} 
+                <Area
+                  type="monotone"
+                  dataKey="orders"
+                  stroke="#3b82f6"
+                  fill="url(#colorOrders)"
+                  strokeWidth={3}
                   activeDot={{ r: 6, strokeWidth: 0 }}
                   name="Orders"
                   animationDuration={1000}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="orders" 
-                  stroke="#3b82f6" 
-                  strokeWidth={3} 
-                  dot={{ r: 4 }} 
+                <Line
+                  type="monotone"
+                  dataKey="orders"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
                   activeDot={{ r: 6 }}
                   name="Orders"
                   animationDuration={1000}
-                  hide={activeMetric !== 'orders'}
+                  hide={activeMetric !== "orders"}
                 />
               </>
             )}
-            
-            {(activeMetric === 'sales' || activeMetric === 'both') && (
+
+            {(activeMetric === "sales" || activeMetric === "both") && (
               <>
-                <Area 
-                  type="monotone" 
-                  dataKey="sales" 
-                  stroke="#10b981" 
-                  fill="url(#colorSales)" 
-                  strokeWidth={3} 
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="#10b981"
+                  fill="url(#colorSales)"
+                  strokeWidth={3}
                   activeDot={{ r: 6, strokeWidth: 0 }}
                   name="Sales"
                   animationDuration={1000}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="sales" 
-                  stroke="#10b981" 
-                  strokeWidth={3} 
-                  dot={{ r: 4 }} 
+                <Line
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
                   activeDot={{ r: 6 }}
                   name="Sales"
                   animationDuration={1000}
-                  hide={activeMetric !== 'sales'}
+                  hide={activeMetric !== "sales"}
                 />
               </>
             )}
-            
+
             {/* Forecast line (dotted) */}
             {showForecast && (
-              <Line 
-                type="monotone" 
-                dataKey="forecast" 
-                stroke="#8b5cf6" 
-                strokeWidth={2} 
+              <Line
+                type="monotone"
+                dataKey="forecast"
+                stroke="#8b5cf6"
+                strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -398,11 +500,12 @@ export default function GrowthCard() {
       </div>
 
       {/* Footer with insights */}
-      <div className="mt-4 pt-4 border-t border-gray-800">
-        <p className="text-sm text-gray-400 flex items-center gap-2">
+      <div className={`mt-4 pt-4 border-t ${dividerColor}`}>
+        <p className={`text-sm ${textSecondary} flex items-center gap-2`}>
           <Award className="text-yellow-400" size={14} />
-          <span className="text-green-400 font-medium">Peak performance</span> 
-          in December with {data[11].orders} orders and {data[11].sales}% sales conversion
+          <span className="text-green-400 font-medium">Peak performance</span>
+          in December with {data[11].orders} orders and {data[11].sales}% sales
+          conversion
         </p>
       </div>
     </div>

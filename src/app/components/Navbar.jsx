@@ -53,9 +53,9 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
       setIsFullscreen(!!document.fullscreenElement);
     }
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
@@ -70,7 +70,7 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
+      document.documentElement.requestFullscreen().catch((err) => {
         console.error(`Error attempting to enable fullscreen: ${err.message}`);
       });
     } else {
@@ -124,7 +124,7 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
         <div className="flex items-center gap-2 relative">
           {/* Toggle Dark/Light Mode */}
           <button
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={() => setDarkMode(v => !v)}
             className={`p-2 rounded-lg transition-all ${
               darkMode ? "hover:bg-gray-800" : "hover:bg-gray-200"
             }`}
@@ -458,7 +458,7 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
                     darkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"
                   }`}
                 >
-                  <Calendar size={20} className= "mb-1 text-yellow-400" />
+                  <Calendar size={20} className="mb-1 text-yellow-400" />
                   <span className="text-xs">Calendar</span>
                 </button>
                 <button
@@ -644,7 +644,7 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
                 >
                   <span className="text-sm">Dark Mode</span>
                   <button
-                    onClick={() => setDarkMode(!darkMode)}
+                    onClick={() => setDarkMode(v => !v)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       darkMode ? "bg-blue-600" : "bg-gray-400"
                     }`}

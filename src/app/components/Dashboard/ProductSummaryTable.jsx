@@ -18,9 +18,10 @@ import {
   Truck,
   Package,
 } from "lucide-react";
+import { useDarkModeCtx } from "@/app/DarkModeContext"; // sesuaikan path
 
 // Status Badge Component
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, darkMode }) => {
   const statusConfig = {
     Delivered: { color: "bg-green-500/20 text-green-400", icon: CheckCircle },
     "Add Cart": { color: "bg-blue-500/20 text-blue-400", icon: ShoppingCart },
@@ -50,11 +51,39 @@ const StatusBadge = ({ status }) => {
 
 // Product Table Component
 const ProductSummaryTable = () => {
+  const { darkMode } = useDarkModeCtx(); // ← ambil dari context
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Warna yang akan berubah berdasarkan mode
+  const bgGradientFrom = darkMode ? "from-[#1e293b]" : "from-[#f1f5f9]";
+  const bgGradientTo = darkMode ? "to-[#0f172a]" : "to-[#e2e8f0]";
+  const borderColor = darkMode ? "border-gray-700" : "border-gray-300";
+  const textPrimary = darkMode ? "text-gray-100" : "text-gray-800";
+  const textSecondary = darkMode ? "text-gray-400" : "text-gray-600";
+  const inputBg = darkMode ? "bg-gray-800" : "bg-white";
+  const inputBorder = darkMode ? "border-gray-700" : "border-gray-300";
+  const inputText = darkMode ? "text-gray-200" : "text-gray-800";
+  const buttonSecondaryBg = darkMode ? "bg-gray-800" : "bg-gray-100";
+  const buttonSecondaryHover = darkMode
+    ? "hover:bg-gray-700"
+    : "hover:bg-gray-200";
+  const buttonSecondaryText = darkMode ? "text-gray-400" : "text-gray-600";
+  const filterBg = darkMode ? "bg-gray-800/50" : "bg-gray-100/80";
+  const tableHeaderBg = darkMode ? "bg-gray-800/50" : "bg-gray-100/50";
+  const tableHeaderText = darkMode ? "text-gray-500" : "text-gray-600";
+  const tableRowHover = darkMode
+    ? "hover:bg-gray-800/30"
+    : "hover:bg-gray-100/50";
+  const tableBorder = darkMode ? "border-gray-800" : "border-gray-200";
+  const paginationBg = darkMode ? "bg-gray-800" : "bg-gray-100";
+  const paginationText = darkMode ? "text-gray-400" : "text-gray-600";
+  const paginationHover = darkMode ? "hover:bg-gray-700" : "hover:bg-gray-200";
+  const paginationActiveBg = darkMode ? "bg-blue-600" : "bg-blue-500";
+  const paginationActiveText = "text-gray-100";
 
   // Sample data
   const productData = [
@@ -198,14 +227,16 @@ const ProductSummaryTable = () => {
   const statuses = ["all", ...new Set(productData.map((item) => item.status))];
 
   return (
-    <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-2xl shadow-lg p-5 border border-gray-700">
+    <div
+      className={`bg-gradient-to-br ${bgGradientFrom} ${bgGradientTo} rounded-2xl shadow-lg p-5 border ${borderColor}`}
+    >
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-100">
+          <h3 className={`text-lg font-semibold ${textPrimary}`}>
             Product Summary
           </h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className={`text-sm ${textSecondary} mt-1`}>
             Manage and track your product inventory
           </p>
         </div>
@@ -219,7 +250,7 @@ const ProductSummaryTable = () => {
             <input
               type="text"
               placeholder="Search Here"
-              className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+              className={`pl-10 pr-4 py-2 ${inputBg} border ${inputBorder} rounded-lg ${inputText} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -227,7 +258,7 @@ const ProductSummaryTable = () => {
 
           <div className="flex gap-2">
             <button
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 hover:bg-gray-700 transition-colors flex items-center gap-2"
+              className={`px-3 py-2 ${buttonSecondaryBg} border ${borderColor} rounded-lg ${buttonSecondaryText} ${buttonSecondaryHover} transition-colors flex items-center gap-2`}
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter size={16} />
@@ -247,13 +278,15 @@ const ProductSummaryTable = () => {
 
       {/* Filter Options */}
       {showFilters && (
-        <div className="mb-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+        <div
+          className={`mb-6 p-4 ${filterBg} rounded-lg border ${borderColor}`}
+        >
           <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-medium text-gray-300">
+            <span className={`text-sm font-medium ${textPrimary}`}>
               Filter by Status
             </span>
             <button onClick={() => setShowFilters(false)}>
-              <X size={16} className="text-gray-400" />
+              <X size={16} className={textSecondary} />
             </button>
           </div>
 
@@ -265,7 +298,9 @@ const ProductSummaryTable = () => {
                 className={`px-3 py-1 rounded-full text-sm transition-colors ${
                   selectedStatus === status
                     ? "bg-blue-600 text-gray-100"
-                    : "bg-gray-700 text-gray-400 hover:bg-gray-600"
+                    : `${darkMode ? "bg-gray-700" : "bg-gray-200"} ${
+                        darkMode ? "text-gray-400" : "text-gray-600"
+                      } ${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-300"}`
                 }`}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -279,7 +314,7 @@ const ProductSummaryTable = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-700">
+            <tr className={`border-b ${tableBorder}`}>
               {[
                 { key: "purchaseDate", label: "Purchase Date" },
                 { key: "clientName", label: "Client Name" },
@@ -292,7 +327,9 @@ const ProductSummaryTable = () => {
               ].map((column) => (
                 <th
                   key={column.key}
-                  className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className={`py-3 px-4 text-left text-xs font-medium ${tableHeaderText} uppercase tracking-wider ${
+                    column.key !== "actions" ? "cursor-pointer" : ""
+                  }`}
                   onClick={() =>
                     column.key !== "actions" && handleSort(column.key)
                   }
@@ -319,28 +356,30 @@ const ProductSummaryTable = () => {
               sortedData.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors"
+                  className={`border-b ${tableBorder} ${tableRowHover} transition-colors`}
                 >
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className={`py-3 px-4 text-sm ${textPrimary}`}>
                     {item.purchaseDate}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className={`py-3 px-4 text-sm ${textPrimary}`}>
                     {item.clientName}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className={`py-3 px-4 text-sm ${textPrimary}`}>
                     {item.productId}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className={`py-3 px-4 text-sm ${textPrimary}`}>
                     {item.product}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300 font-medium">
+                  <td
+                    className={`py-3 px-4 text-sm ${textPrimary} font-medium`}
+                  >
                     {item.productCost}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className={`py-3 px-4 text-sm ${textPrimary}`}>
                     {item.paymentMode}
                   </td>
                   <td className="py-3 px-4">
-                    <StatusBadge status={item.status} />
+                    <StatusBadge status={item.status} darkMode={darkMode} />
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
@@ -368,7 +407,7 @@ const ProductSummaryTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="py-8 text-center text-gray-500">
+                <td colSpan="8" className={`py-8 text-center ${textSecondary}`}>
                   No products found matching your criteria
                 </td>
               </tr>
@@ -378,22 +417,32 @@ const ProductSummaryTable = () => {
       </div>
 
       {/* Table Footer */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t border-gray-700">
-        <div className="text-sm text-gray-500">
+      <div
+        className={`flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t ${tableBorder}`}
+      >
+        <div className={`text-sm ${textSecondary}`}>
           Showing {sortedData.length} of {productData.length} products
         </div>
 
         <div className="flex gap-2">
-          <button className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 text-sm hover:bg-gray-700 transition-colors">
+          <button
+            className={`px-3 py-1.5 rounded-lg ${paginationBg} ${paginationText} text-sm ${paginationHover} transition-colors`}
+          >
             Previous
           </button>
-          <button className="px-3 py-1.5 rounded-lg bg-blue-600 text-gray-100 text-sm hover:bg-blue-500 transition-colors">
+          <button
+            className={`px-3 py-1.5 rounded-lg ${paginationActiveBg} ${paginationActiveText} text-sm hover:bg-blue-500 transition-colors`}
+          >
             1
           </button>
-          <button className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 text-sm hover:bg-gray-700 transition-colors">
+          <button
+            className={`px-3 py-1.5 rounded-lg ${paginationBg} ${paginationText} text-sm ${paginationHover} transition-colors`}
+          >
             2
           </button>
-          <button className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 text-sm hover:bg-gray-700 transition-colors">
+          <button
+            className={`px-3 py-1.5 rounded-lg ${paginationBg} ${paginationText} text-sm ${paginationHover} transition-colors`}
+          >
             Next
           </button>
         </div>
