@@ -124,7 +124,7 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
         <div className="flex items-center gap-2 relative">
           {/* Toggle Dark/Light Mode */}
           <button
-            onClick={() => setDarkMode(v => !v)}
+            onClick={() => setDarkMode((v) => !v)}
             className={`p-2 rounded-lg transition-all ${
               darkMode ? "hover:bg-gray-800" : "hover:bg-gray-200"
             }`}
@@ -644,7 +644,7 @@ export default function Navbar({ onToggleSidebar, darkMode, setDarkMode }) {
                 >
                   <span className="text-sm">Dark Mode</span>
                   <button
-                    onClick={() => setDarkMode(v => !v)}
+                    onClick={() => setDarkMode((v) => !v)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       darkMode ? "bg-blue-600" : "bg-gray-400"
                     }`}

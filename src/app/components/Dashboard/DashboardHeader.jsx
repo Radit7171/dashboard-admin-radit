@@ -9,7 +9,7 @@ export default function DashboardHeader({ sidebarOpen }) {
   return (
     <div
       className={`w-full border-b py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between transition-all duration-300
-        ${sidebarOpen ? "ml-64" : "ml-0"} ${
+        ${sidebarOpen ? "" : "ml-0"} ${
         darkMode
           ? "bg-[#16213a] border-gray-800 text-gray-100"
           : "bg-white border-gray-200 text-gray-800 shadow-sm"
