@@ -1,7 +1,7 @@
 // src/app/analytics/page.jsx
 "use client";
 
-import { useRef, useContext, useState } from "react";
+import { useRef, useContext, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import DarkModeContext from "../DarkModeContext";
 import Sidebar from "../components/Sidebar";
@@ -135,9 +135,10 @@ const StatCard = ({ title, value, change, icon, darkMode, tooltip }) => {
   );
 };
 
-// Komponen untuk Visitor Trends (Line Chart)
+// Komponen untuk Visitor Trends (Line Chart Interaktif)
 const VisitorTrendsChart = ({ darkMode, onOptionsClick }) => {
   const [timeRange, setTimeRange] = useState("7d");
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
@@ -157,6 +158,20 @@ const VisitorTrendsChart = ({ darkMode, onOptionsClick }) => {
 
   const maxVisitors = Math.max(...data.map((d) => d.visitors));
   const chartHeight = 200;
+  const chartWidth = "100%";
+  const padding = 40;
+
+  // Hitung posisi titik
+  const points = data.map((item, index) => {
+    const x = padding + (index * (100 - padding * 2)) / (data.length - 1);
+    const y = 100 - (item.visitors / maxVisitors) * (100 - padding);
+    return { x, y, ...item };
+  });
+
+  // Buat path untuk garis
+  const linePath = points
+    .map((point, i) => `${i === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
 
   return (
     <div
@@ -217,34 +232,116 @@ const VisitorTrendsChart = ({ darkMode, onOptionsClick }) => {
         </div>
       </div>
 
-      <div className="h-64">
-        <div className="flex items-end justify-between h-48 mt-4">
+      <div className="h-64 relative">
+        <svg
+          viewBox="0 0 100 100"
+          className="w-full h-full"
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
+          {/* Grid lines */}
+          {[0, 25, 50, 75, 100].map((yPos) => (
+            <line
+              key={yPos}
+              x1={padding}
+              y1={yPos}
+              x2={100 - padding}
+              y2={yPos}
+              stroke={darkMode ? "#374151" : "#e5e7eb"}
+              strokeWidth="0.5"
+            />
+          ))}
+
+          {/* Garis chart */}
+          <motion.path
+            d={linePath}
+            fill="none"
+            stroke={darkMode ? "#3b82f6" : "#2563eb"}
+            strokeWidth="2"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+          />
+
+          {/* Area di bawah garis */}
+          <path
+            d={`${linePath} L ${points[points.length - 1].x} 100 L ${
+              points[0].x
+            } 100 Z`}
+            fill={
+              darkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(37, 99, 235, 0.2)"
+            }
+          />
+
+          {/* Titik-titik data */}
+          {points.map((point, index) => (
+            <g key={index}>
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r="3"
+                fill={darkMode ? "#3b82f6" : "#2563eb"}
+                onMouseEnter={() => setHoveredIndex(index)}
+                className="cursor-pointer"
+              />
+
+              {/* Tooltip saat hover */}
+              {hoveredIndex === index && (
+                <g>
+                  <rect
+                    x={point.x - 15}
+                    y={point.y - 25}
+                    width="30"
+                    height="20"
+                    rx="3"
+                    fill={darkMode ? "#1f2937" : "#f3f4f6"}
+                    stroke={darkMode ? "#374151" : "#d1d5db"}
+                  />
+                  <text
+                    x={point.x}
+                    y={point.y - 12}
+                    textAnchor="middle"
+                    fill={darkMode ? "#f9fafb" : "#111827"}
+                    fontSize="3"
+                    fontWeight="bold"
+                  >
+                    {point.visitors}
+                  </text>
+                </g>
+              )}
+            </g>
+          ))}
+        </svg>
+
+        {/* Label sumbu X */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4">
           {data.map((item, index) => (
-            <div key={index} className="flex flex-col items-center w-10">
-              <div
-                className={`w-2 rounded-t-full ${
-                  darkMode ? "bg-blue-500" : "bg-blue-400"
-                }`}
-                style={{ height: `${(item.visitors / maxVisitors) * 100}%` }}
-              ></div>
-              <span
-                className={`text-xs mt-2 ${
-                  darkMode ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {item.day}
-              </span>
-            </div>
+            <span
+              key={index}
+              className={`text-xs ${
+                darkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              {item.day}
+            </span>
           ))}
         </div>
 
-        <div
-          className={`flex justify-between mt-4 px-4 ${
-            darkMode ? "text-gray-400" : "text-gray-600"
-          }`}
-        >
-          <span className="text-xs">0</span>
-          <span className="text-xs">{maxVisitors} visitors</span>
+        {/* Label sumbu Y */}
+        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between py-2">
+          <span
+            className={`text-xs pl-2 ${
+              darkMode ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            {maxVisitors}
+          </span>
+          <span
+            className={`text-xs pl-2 ${
+              darkMode ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            0
+          </span>
         </div>
       </div>
 
@@ -269,9 +366,10 @@ const VisitorTrendsChart = ({ darkMode, onOptionsClick }) => {
   );
 };
 
-// Komponen untuk Traffic Sources (Pie Chart)
+// Komponen untuk Traffic Sources (Pie Chart Interaktif)
 const TrafficSourcesChart = ({ darkMode, onOptionsClick }) => {
   const [timeRange, setTimeRange] = useState("7d");
+  const [hoveredSegment, setHoveredSegment] = useState(null);
 
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
@@ -280,12 +378,62 @@ const TrafficSourcesChart = ({ darkMode, onOptionsClick }) => {
 
   // Data untuk pie chart
   const data = [
-    { source: "Organic Search", value: 45, color: "bg-blue-500" },
-    { source: "Direct", value: 25, color: "bg-green-500" },
-    { source: "Social Media", value: 15, color: "bg-purple-500" },
-    { source: "Referral", value: 10, color: "bg-yellow-500" },
-    { source: "Email", value: 5, color: "bg-red-500" },
+    {
+      source: "Organic Search",
+      value: 45,
+      color: darkMode ? "#3b82f6" : "#2563eb",
+    },
+    { source: "Direct", value: 25, color: darkMode ? "#10b981" : "#059669" },
+    {
+      source: "Social Media",
+      value: 15,
+      color: darkMode ? "#8b5cf6" : "#7c3aed",
+    },
+    { source: "Referral", value: 10, color: darkMode ? "#f59e0b" : "#d97706" },
+    { source: "Email", value: 5, color: darkMode ? "#ef4444" : "#dc2626" },
   ];
+
+  // Hitung sudut untuk pie chart
+  let currentAngle = -90; // Mulai dari atas
+  const totalValue = data.reduce((sum, item) => sum + item.value, 0);
+
+  const segments = data.map((item) => {
+    const angle = (item.value / totalValue) * 360;
+    const segment = {
+      ...item,
+      startAngle: currentAngle,
+      endAngle: currentAngle + angle,
+      largeArc: angle > 180 ? 1 : 0,
+    };
+    currentAngle += angle;
+    return segment;
+  });
+
+  // Fungsi untuk menghitung koordinat titik pada lingkaran
+  const getCoordinates = (angle, radius) => {
+    const rad = (angle * Math.PI) / 180;
+    return {
+      x: 50 + radius * Math.cos(rad),
+      y: 50 + radius * Math.sin(rad),
+    };
+  };
+
+  // Fungsi untuk membuat path pie segment
+  const createPiePath = (segment, innerRadius = 0, outerRadius = 35) => {
+    const start = getCoordinates(segment.startAngle, outerRadius);
+    const end = getCoordinates(segment.endAngle, outerRadius);
+    const innerStart = getCoordinates(segment.startAngle, innerRadius);
+    const innerEnd = getCoordinates(segment.endAngle, innerRadius);
+
+    return [
+      `M ${innerStart.x} ${innerStart.y}`,
+      `L ${start.x} ${start.y}`,
+      `A ${outerRadius} ${outerRadius} 0 ${segment.largeArc} 1 ${end.x} ${end.y}`,
+      `L ${innerEnd.x} ${innerEnd.y}`,
+      `A ${innerRadius} ${innerRadius} 0 ${segment.largeArc} 0 ${innerStart.x} ${innerStart.y}`,
+      "Z",
+    ].join(" ");
+  };
 
   return (
     <div
@@ -347,55 +495,57 @@ const TrafficSourcesChart = ({ darkMode, onOptionsClick }) => {
       </div>
 
       <div className="flex items-center h-64">
-        <div className="w-1/2">
-          <div className="relative w-40 h-40 mx-auto">
-            <div className="absolute inset-0 rounded-full border-8 border-blue-500"></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-green-500"
-              style={{
-                clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%)",
-              }}
-            ></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-purple-500"
-              style={{
-                clipPath: "polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)",
-              }}
-            ></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-yellow-500"
-              style={{
-                clipPath: "polygon(50% 50%, 50% 100%, 0% 100%, 0% 50%)",
-              }}
-            ></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-red-500"
-              style={{ clipPath: "polygon(50% 50%, 0% 50%, 0% 0%, 50% 0%)" }}
-            ></div>
-            <div
-              className={`absolute inset-0 flex items-center justify-center rounded-full ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              }`}
+        <div className="w-1/2 relative">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            {segments.map((segment, index) => (
+              <path
+                key={index}
+                d={createPiePath(segment)}
+                fill={segment.color}
+                stroke={darkMode ? "#1f2937" : "#ffffff"}
+                strokeWidth="1"
+                onMouseEnter={() => setHoveredSegment(index)}
+                onMouseLeave={() => setHoveredSegment(null)}
+                className="cursor-pointer transition-transform duration-200"
+                style={{
+                  transform:
+                    hoveredSegment === index ? "scale(1.05)" : "scale(1)",
+                  transformOrigin: "center",
+                }}
+              />
+            ))}
+
+            {/* Label di tengah */}
+            <text
+              x="50"
+              y="50"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill={darkMode ? "#f9fafb" : "#111827"}
+              fontSize="6"
+              fontWeight="bold"
             >
-              <span
-                className={`text-lg font-bold ${
-                  darkMode ? "text-white" : "text-gray-900"
-                }`}
-              >
-                100%
-              </span>
-            </div>
-          </div>
+              {totalValue}%
+            </text>
+          </svg>
         </div>
 
         <div className="w-1/2 space-y-3">
           {data.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div className={`w-4 h-4 rounded-sm ${item.color} mr-2`}></div>
+            <div
+              key={index}
+              className="flex items-center"
+              onMouseEnter={() => setHoveredSegment(index)}
+              onMouseLeave={() => setHoveredSegment(null)}
+            >
+              <div
+                className={`w-4 h-4 rounded-sm mr-2`}
+                style={{ backgroundColor: item.color }}
+              ></div>
               <span
                 className={`text-sm ${
                   darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
+                } ${hoveredSegment === index ? "font-bold" : ""}`}
               >
                 {item.source}:{" "}
                 <span className="font-medium">{item.value}%</span>
@@ -421,9 +571,10 @@ const TrafficSourcesChart = ({ darkMode, onOptionsClick }) => {
   );
 };
 
-// Komponen untuk Device Breakdown (Donut Chart)
+// Komponen untuk Device Breakdown (Bar Chart Interaktif)
 const DeviceBreakdownChart = ({ darkMode, onOptionsClick }) => {
   const [timeRange, setTimeRange] = useState("7d");
+  const [hoveredBar, setHoveredBar] = useState(null);
 
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
@@ -432,11 +583,13 @@ const DeviceBreakdownChart = ({ darkMode, onOptionsClick }) => {
 
   // Data untuk device breakdown
   const data = [
-    { device: "Mobile", value: 62, color: "bg-blue-500" },
-    { device: "Desktop", value: 28, color: "bg-green-500" },
-    { device: "Tablet", value: 8, color: "bg-purple-500" },
-    { device: "Other", value: 2, color: "bg-gray-500" },
+    { device: "Mobile", value: 62, color: darkMode ? "#3b82f6" : "#2563eb" },
+    { device: "Desktop", value: 28, color: darkMode ? "#10b981" : "#059669" },
+    { device: "Tablet", value: 8, color: darkMode ? "#8b5cf6" : "#7c3aed" },
+    { device: "Other", value: 2, color: darkMode ? "#9ca3af" : "#6b7280" },
   ];
+
+  const maxValue = Math.max(...data.map((d) => d.value));
 
   return (
     <div
@@ -497,59 +650,51 @@ const DeviceBreakdownChart = ({ darkMode, onOptionsClick }) => {
         </div>
       </div>
 
-      <div className="flex items-center h-64">
-        <div className="w-1/2">
-          <div className="relative w-40 h-40 mx-auto">
-            <div
-              className="absolute inset-0 rounded-full border-8 border-blue-500"
-              style={{
-                clipPath: "polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%)",
-              }}
-            ></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-green-500"
-              style={{
-                clipPath: "polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)",
-              }}
-            ></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-purple-500"
-              style={{
-                clipPath: "polygon(50% 50%, 50% 100%, 0% 100%, 0% 50%)",
-              }}
-            ></div>
-            <div
-              className="absolute inset-0 rounded-full border-8 border-gray-500"
-              style={{ clipPath: "polygon(50% 50%, 0% 50%, 0% 0%, 50% 0%)" }}
-            ></div>
-            <div
-              className={`absolute inset-4 flex items-center justify-center rounded-full ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <span
-                className={`text-lg font-bold ${
-                  darkMode ? "text-white" : "text-gray-900"
-                }`}
-              >
-                100%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-1/2 space-y-3">
+      <div className="h-64">
+        <div className="flex flex-col h-full justify-between py-2">
           {data.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div className={`w-4 h-4 rounded-sm ${item.color} mr-2`}></div>
+            <div key={index} className="flex items-center mb-3">
               <span
-                className={`text-sm ${
+                className={`text-sm w-16 ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >
-                {item.device}:{" "}
-                <span className="font-medium">{item.value}%</span>
+                {item.device}
               </span>
+              <div
+                className="flex-1 ml-2 relative"
+                onMouseEnter={() => setHoveredBar(index)}
+                onMouseLeave={() => setHoveredBar(null)}
+              >
+                <div
+                  className={`h-6 rounded-full transition-all duration-300`}
+                  style={{
+                    width: `${(item.value / maxValue) * 100}%`,
+                    backgroundColor: item.color,
+                    opacity: hoveredBar === index ? 0.8 : 1,
+                  }}
+                ></div>
+                <span
+                  className={`absolute right-0 top-0 text-xs px-2 ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
+                  {item.value}%
+                </span>
+
+                {/* Tooltip saat hover */}
+                {hoveredBar === index && (
+                  <div
+                    className={`absolute -top-8 left-0 px-2 py-1 rounded text-xs ${
+                      darkMode
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    {item.device}: {item.value}%
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -571,9 +716,10 @@ const DeviceBreakdownChart = ({ darkMode, onOptionsClick }) => {
   );
 };
 
-// Komponen untuk Geographic Distribution (Peta)
+// Komponen untuk Geographic Distribution (Peta Interaktif)
 const GeographicDistributionChart = ({ darkMode, onOptionsClick }) => {
   const [timeRange, setTimeRange] = useState("7d");
+  const [hoveredCountry, setHoveredCountry] = useState(null);
 
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
@@ -582,13 +728,17 @@ const GeographicDistributionChart = ({ darkMode, onOptionsClick }) => {
 
   // Data untuk geographic distribution
   const data = [
-    { country: "United States", value: 42, color: "bg-blue-500" },
-    { country: "United Kingdom", value: 18, color: "bg-green-500" },
-    { country: "Germany", value: 12, color: "bg-purple-500" },
-    { country: "France", value: 9, color: "bg-yellow-500" },
-    { country: "Canada", value: 7, color: "bg-red-500" },
-    { country: "Other", value: 12, color: "bg-gray-500" },
+    { country: "United States", value: 42, x: 25, y: 40 },
+    { country: "United Kingdom", value: 18, x: 47, y: 30 },
+    { country: "Germany", value: 12, x: 50, y: 35 },
+    { country: "France", value: 9, x: 48, y: 38 },
+    { country: "Canada", value: 7, x: 20, y: 35 },
+    { country: "Australia", value: 5, x: 75, y: 65 },
+    { country: "Japan", value: 4, x: 80, y: 40 },
+    { country: "Brazil", value: 3, x: 35, y: 60 },
   ];
+
+  const maxValue = Math.max(...data.map((d) => d.value));
 
   return (
     <div
@@ -649,61 +799,91 @@ const GeographicDistributionChart = ({ darkMode, onOptionsClick }) => {
         </div>
       </div>
 
-      <div className="h-64 flex">
-        <div className="w-1/2 relative">
-          {/* Simplified world map representation */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className={`w-32 h-16 rounded-full border-2 ${
-                darkMode ? "border-gray-600" : "border-gray-300"
-              }`}
-            ></div>
-            <div
-              className={`absolute top-1/4 left-1/2 w-8 h-8 rounded-full ${
-                darkMode ? "bg-blue-500" : "bg-blue-400"
-              } transform -translate-x-1/2 -translate-y-1/2`}
-            ></div>
-            <div
-              className={`absolute top-1/3 right-1/4 w-6 h-6 rounded-full ${
-                darkMode ? "bg-green-500" : "bg-green-400"
-              } transform -translate-x-1/2 -translate-y-1/2`}
-            ></div>
-            <div
-              className={`absolute top-1/2 left-1/3 w-5 h-5 rounded-full ${
-                darkMode ? "bg-purple-500" : "bg-purple-400"
-              } transform -translate-x-1/2 -translate-y-1/2`}
-            ></div>
-            <div
-              className={`absolute bottom-1/3 left-2/3 w-4 h-4 rounded-full ${
-                darkMode ? "bg-yellow-500" : "bg-yellow-400"
-              } transform -translate-x-1/2 -translate-y-1/2`}
-            ></div>
-            <div
-              className={`absolute bottom-1/4 right-1/3 w-4 h-4 rounded-full ${
-                darkMode ? "bg-red-500" : "bg-red-400"
-              } transform -translate-x-1/2 -translate-y-1/2`}
-            ></div>
-          </div>
-        </div>
+      <div className="h-64 relative">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          {/* Peta dunia sederhana */}
+          <path
+            d="M20,30 Q30,20 40,30 T60,30 T75,35 T85,40 T90,50 T85,60 T75,65 T60,70 T40,70 T25,65 T15,60 T10,50 T15,40 Z"
+            fill={darkMode ? "#374151" : "#e5e7eb"}
+            stroke={darkMode ? "#4b5563" : "#d1d5db"}
+          />
 
-        <div className="w-1/2 space-y-3">
-          {data.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div className={`w-4 h-4 rounded-sm ${item.color} mr-2`}></div>
-              <span
-                className={`text-sm ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
+          {/* Titik-titik untuk negara */}
+          {data.map((item, index) => {
+            const size = 3 + (item.value / maxValue) * 5;
+            return (
+              <circle
+                key={index}
+                cx={item.x}
+                cy={item.y}
+                r={size}
+                fill={darkMode ? "#3b82f6" : "#2563eb"}
+                stroke={darkMode ? "#1e40af" : "#1e40af"}
+                strokeWidth="0.5"
+                onMouseEnter={() => setHoveredCountry(index)}
+                onMouseLeave={() => setHoveredCountry(null)}
+                className="cursor-pointer transition-all duration-200"
+                style={{
+                  opacity:
+                    hoveredCountry === null || hoveredCountry === index
+                      ? 1
+                      : 0.5,
+                }}
+              />
+            );
+          })}
+
+          {/* Tooltip untuk negara yang dihover */}
+          {hoveredCountry !== null && (
+            <g>
+              <rect
+                x={data[hoveredCountry].x - 15}
+                y={data[hoveredCountry].y - 25}
+                width="30"
+                height="20"
+                rx="3"
+                fill={darkMode ? "#1f2937" : "#f3f4f6"}
+                stroke={darkMode ? "#374151" : "#d1d5db"}
+              />
+              <text
+                x={data[hoveredCountry].x}
+                y={data[hoveredCountry].y - 17}
+                textAnchor="middle"
+                fill={darkMode ? "#f9fafb" : "#111827"}
+                fontSize="3"
               >
-                {item.country}:{" "}
-                <span className="font-medium">{item.value}%</span>
-              </span>
-            </div>
-          ))}
-        </div>
+                {data[hoveredCountry].country}
+              </text>
+              <text
+                x={data[hoveredCountry].x}
+                y={data[hoveredCountry].y - 12}
+                textAnchor="middle"
+                fill={darkMode ? "#3b82f6" : "#2563eb"}
+                fontSize="3"
+                fontWeight="bold"
+              >
+                {data[hoveredCountry].value}%
+              </text>
+            </g>
+          )}
+        </svg>
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex justify-between items-center">
+        <div className="flex items-center">
+          <div
+            className={`w-3 h-3 rounded-full ${
+              darkMode ? "bg-blue-500" : "bg-blue-400"
+            } mr-2`}
+          ></div>
+          <span
+            className={`text-sm ${
+              darkMode ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            Larger circles indicate higher traffic
+          </span>
+        </div>
         <button
           onClick={() => console.log("Explore Geographic Distribution data")}
           className={`px-4 py-2 rounded-lg text-sm font-medium ${
@@ -865,8 +1045,11 @@ const DataTable = ({ darkMode }) => {
           </thead>
           <tbody>
             {currentData.map((row, index) => (
-              <tr
+              <motion.tr
                 key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: index * 0.05 }}
                 className={`${
                   darkMode ? "border-gray-700" : "border-gray-200"
                 } ${
@@ -936,7 +1119,7 @@ const DataTable = ({ darkMode }) => {
                     </svg>
                   </button>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
@@ -1055,7 +1238,9 @@ const DateRangePicker = ({ darkMode, onDateChange }) => {
       </button>
 
       {isOpen && (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           className={`absolute top-full left-0 mt-1 py-2 rounded-lg shadow-lg z-10 ${
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
@@ -1077,7 +1262,7 @@ const DateRangePicker = ({ darkMode, onDateChange }) => {
               {range.label}
             </button>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

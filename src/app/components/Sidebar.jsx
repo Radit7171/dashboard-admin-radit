@@ -57,6 +57,9 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "dashboard":
         router.push("/dashboard");
         break;
+      case "dashboard-2":
+        router.push("/ecommerce");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);
