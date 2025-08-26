@@ -60,6 +60,18 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "dashboard-2":
         router.push("/ecommerce");
         break;
+      case "dashboard-3":
+        router.push("/CRM");
+        break;
+      case "email":
+        router.push("/web_apps/email");
+        break;
+      case "chat":
+        router.push("/web_apps/chat");
+        break;
+      case "calendar":
+        router.push("/web_apps/calendar");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);
