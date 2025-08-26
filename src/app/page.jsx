@@ -111,16 +111,11 @@ export default function DashboardPage() {
             >
               <DashboardHeader sidebarOpen={sidebarOpen} darkMode={darkMode} />
             </motion.div>
-
             <AnimatedSection className="m-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                <AnimatedCard>
-                  <StorageCard name="Radit" usage={75} total={100} />
-                </AnimatedCard>
-                <AnimatedCard>
-                  <GrowthCard />
-                </AnimatedCard>
-              </div>
+              <StorageCard name="Radit" usage={75} total={100} />
+            </AnimatedSection>
+            <AnimatedSection className="m-5">
+              <GrowthCard />
             </AnimatedSection>
 
             <AnimatedSection className="m-5">
