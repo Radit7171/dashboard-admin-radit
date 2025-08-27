@@ -99,6 +99,12 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "buttons":
         router.push("/Component/buttons");
         break;
+      case "cards":
+        router.push("/Component/cards");
+        break;
+      case "modals":
+        router.push("/Component/modals");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);

@@ -871,7 +871,11 @@ export default function ButtonsPage() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className={
+                        darkMode
+                          ? "divide-y divide-gray-200 dark:divide-gray-700"
+                          : "bg-gray-100 text-gray-800"
+                      }>
                       <tr>
                         <td className="px-4 py-3 font-mono text-sm">variant</td>
                         <td className="px-4 py-3 text-sm">
