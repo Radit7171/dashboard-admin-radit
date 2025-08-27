@@ -71,6 +71,17 @@ export default function Sidebar({ open = true, darkMode = true }) {
         break;
       case "calendar":
         router.push("/web_apps/calendar");
+      case "ecommerce":
+        router.push("/ecommerce");
+        break;
+      case "users":
+        router.push("/pages/users");
+        break;
+      case "profile":
+        router.push("/pages/profile");
+        break;
+      case "pricing":
+        router.push("/pages/pricing");
         break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
