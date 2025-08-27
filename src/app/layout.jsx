@@ -1,4 +1,4 @@
-// app/layout.jsx (Layout yang disederhanakan)
+// app/layout.jsx
 "use client";
 
 import { useState } from "react";
@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
   if (!isMounted) {
     return (
       <html lang="en" className="h-full">
-        <body className="flex min-h-screen bg-white">
+        <body className="flex min-h-screen w-full bg-white">
           <div className="flex items-center justify-center w-full">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
@@ -25,10 +25,12 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en" className="h-full">
-      <body className={darkMode ? "dark" : "light"}>
+      <body className={`${darkMode ? "dark" : "light"} min-h-screen w-full`}>
         <DarkModeProvider value={{ darkMode, setDarkMode }}>
           <ScrollbarStyle />
-          {children}
+          <main className="w-full">
+            {children}
+          </main>
         </DarkModeProvider>
       </body>
     </html>

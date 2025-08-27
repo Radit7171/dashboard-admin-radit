@@ -83,6 +83,14 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "pricing":
         router.push("/pages/pricing");
         break;
+      case "faq":
+        router.push("/pages/faq");
+        break;
+      case "login":
+        router.push("/Authentication/login-register");
+      case "register":
+        router.push("/Authentication/login-register");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);
