@@ -91,6 +91,14 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "register":
         router.push("/Authentication/login-register");
         break;
+      case "forgot-password":
+        router.push("/Authentication/forgot-password");
+      case "alerts":
+        router.push("/Component/alerts");
+        break;
+      case "buttons":
+        router.push("/Component/buttons");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);
