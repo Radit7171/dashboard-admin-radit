@@ -1167,7 +1167,7 @@ const [isVisible, setIsVisible] = useState(true);
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className={darkMode ? "text-white" : "text-black"}>
                       <tr>
                         <td className="px-4 py-3 font-mono text-sm">type</td>
                         <td className="px-4 py-3 text-sm">

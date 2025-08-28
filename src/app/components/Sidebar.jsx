@@ -105,6 +105,27 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "modals":
         router.push("/Component/modals");
         break;
+      case "line-charts":
+        router.push("/Charts/line-charts");
+        break;
+      case "bar-charts":
+        router.push("/Charts/bar-charts");
+        break;
+      case "pie-charts":
+        router.push("/Charts/pie-charts");
+        break;
+      case "pie-charts":
+        router.push("/Charts/pie-charts");
+        break;
+      case "basic-elements":
+        router.push("/Forms/basic-elements");
+        break;
+      case "advanced-elements":
+        router.push("/Forms/advanced-elements");
+        break;
+      case "editors":
+        router.push("/Forms/editors");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);
