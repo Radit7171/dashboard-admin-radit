@@ -126,6 +126,9 @@ export default function Sidebar({ open = true, darkMode = true }) {
       case "editors":
         router.push("/Forms/editors");
         break;
+      case "wizard":
+        router.push("/Forms/wizard");
+        break;
       // Tambahkan case lainnya sesuai kebutuhan
       default:
         console.log(`Navigating to: ${menu}`);
